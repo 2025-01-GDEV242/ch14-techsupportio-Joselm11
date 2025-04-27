@@ -123,20 +123,42 @@ public class Responder
     {
         Charset charset = Charset.forName("US-ASCII");
         Path path = Paths.get(FILE_OF_DEFAULT_RESPONSES);
-        try (BufferedReader reader = Files.newBufferedReader(path, charset)) {
+        try (BufferedReader reader = Files.newBufferedReader(path, charset)) 
+        {
             String response = reader.readLine();
-            while(response != null) {
-                defaultResponses.add(response);
+            String entry = "";
+            boolean lastLineBlank = false;
+
+            while (response != null) {
+                if (response.trim().isEmpty()) {
+                    if (lastLineBlank) {
+                        throw new IOException("Two or more blank lines in a row in " + FILE_OF_DEFAULT_RESPONSES);
+                    }
+                    if (!entry.equals("")) {
+                        defaultResponses.add(entry.trim());
+                        entry = "";
+                    }
+                    lastLineBlank = true;
+                } else {
+                    if (!entry.equals("")) {
+                        entry = entry + " ";
+                    }
+                    entry = entry + response.trim();
+                    lastLineBlank = false;
+                }
                 response = reader.readLine();
             }
-        }
-        catch(FileNotFoundException e) {
-            System.err.println("Unable to open " + FILE_OF_DEFAULT_RESPONSES);
+
+            // If file ends without a blank line, add the last entry
+            if (!entry.equals("")) {
+                defaultResponses.add(entry.trim());
+            }
         }
         catch(IOException e) {
             System.err.println("A problem was encountered reading " +
-                               FILE_OF_DEFAULT_RESPONSES);
+                           FILE_OF_DEFAULT_RESPONSES + ": " + e.getMessage());
         }
+
         // Make sure we have at least one response.
         if(defaultResponses.size() == 0) {
             defaultResponses.add("Could you elaborate on that?");

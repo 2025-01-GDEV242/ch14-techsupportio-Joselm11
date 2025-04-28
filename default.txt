@@ -9,8 +9,6 @@ system configuration?
 
 That sounds interesting. Tell me more...
 
-
-
 I need a bit more information on that.
 
 Have you checked that you do not have a dll conflict?
